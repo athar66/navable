@@ -286,7 +286,7 @@
       gap: 9px;
     }
 
-    .primary, .secondary {
+    .primary, .secondary, .maps-button {
       width: 100%;
       min-height: 57px;
       border-radius: 17px;
@@ -306,6 +306,16 @@
       border: 1px solid rgba(148, 163, 184, .2);
       color: #e2e8f0;
       background: rgba(15, 23, 42, .66);
+    }
+
+    .maps-button {
+      border: 1px solid rgba(96, 165, 250, .3);
+      color: #bfdbfe;
+      background: rgba(30, 64, 175, .18);
+    }
+
+    .maps-button[hidden] {
+      display: none;
     }
 
     button:disabled {
@@ -456,6 +466,7 @@
 
     <footer class="controls">
       <button id="startButton" class="primary" type="button">Start navigation</button>
+      <button id="openMapsButton" class="maps-button" type="button">Open in Maps</button>
       <button id="recalibrateButton" class="secondary" type="button" hidden>Recalibrate compass</button>
       <p class="privacy">Your live location is processed only on this device and is not uploaded.</p>
     </footer>
@@ -495,6 +506,7 @@
     headingSource: document.getElementById("headingSource"),
     notice: document.getElementById("notice"),
     startButton: document.getElementById("startButton"),
+    openMapsButton: document.getElementById("openMapsButton"),
     recalibrateButton: document.getElementById("recalibrateButton"),
     arrivalOverlay: document.getElementById("arrivalOverlay"),
     arrivalText: document.getElementById("arrivalText"),
@@ -785,6 +797,24 @@
     );
   }
 
+  function openInMaps() {
+    if (!validCoordinates) {
+      setNotice("This link contains missing or invalid coordinates.", "error");
+      return;
+    }
+
+    const coordinates = `${destinationLat},${destinationLng}`;
+
+    // Universal Google Maps directions URL. On many phones this opens the
+    // installed maps app; otherwise it opens Google Maps in the browser.
+    const mapsUrl =
+      `https://www.google.com/maps/dir/?api=1` +
+      `&destination=${encodeURIComponent(coordinates)}` +
+      `&travelmode=walking`;
+
+    window.open(mapsUrl, "_blank", "noopener,noreferrer");
+  }
+
   async function startNavigation() {
     if (!validCoordinates) {
       setNotice("This link contains missing or invalid coordinates.", "error");
@@ -816,6 +846,7 @@
   }
 
   els.startButton.addEventListener("click", startNavigation);
+  els.openMapsButton.addEventListener("click", openInMaps);
 
   els.recalibrateButton.addEventListener("click", () => {
     setNotice("Move your phone in a figure-eight motion, then hold it upright.");
@@ -830,6 +861,7 @@
 
   if (!validCoordinates) {
     els.startButton.disabled = true;
+    els.openMapsButton.hidden = true;
     els.modePill.textContent = "Invalid link";
     els.remainingLabel.textContent = "Coordinates missing";
     setNotice("The destination latitude or longitude is missing or invalid.", "error");
