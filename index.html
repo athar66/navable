@@ -521,12 +521,48 @@
   let requestedRotation = 0;
   let arrivalShown = false;
 
+  // Compass stabilisation
+  let smoothedHeading = null;
+  let lastAcceptedHeading = null;
+  let lastPositionForMovement = null;
+  let isUserMoving = false;
+
+  const HEADING_SMOOTHING = 0.10;
+  const STATIONARY_DEAD_ZONE = 7;
+  const MOVING_DEAD_ZONE = 2;
+  const MOVEMENT_THRESHOLD_METRES = 1.8;
+
   const toRadians = value => value * Math.PI / 180;
   const toDegrees = value => value * 180 / Math.PI;
   const normaliseDegrees = value => (value % 360 + 360) % 360;
 
   function shortestRotation(from, to) {
     return from + ((to - from + 540) % 360 - 180);
+  }
+
+  function signedAngleDifference(from, to) {
+    return ((to - from + 540) % 360) - 180;
+  }
+
+  function smoothHeading(previous, next, factor) {
+    if (previous === null) return next;
+    return normaliseDegrees(
+      previous + signedAngleDifference(previous, next) * factor
+    );
+  }
+
+  function shouldAcceptHeading(nextHeading) {
+    if (lastAcceptedHeading === null) return true;
+
+    const difference = Math.abs(
+      signedAngleDifference(lastAcceptedHeading, nextHeading)
+    );
+
+    const deadZone = isUserMoving
+      ? MOVING_DEAD_ZONE
+      : STATIONARY_DEAD_ZONE;
+
+    return difference >= deadZone;
   }
 
   function distanceMetres(lat1, lng1, lat2, lng2) {
@@ -639,7 +675,9 @@
         const rotation = normaliseDegrees(targetBearing - heading);
         setArrowRotation(rotation);
         els.instruction.textContent = guidanceText(rotation);
-        els.headingSource.textContent = deviceHeading !== null ? "Phone compass" : "Walking direction";
+        els.headingSource.textContent = deviceHeading !== null
+          ? (isUserMoving ? "Phone compass" : "Compass stabilised")
+          : "Walking direction";
       } else {
         els.instruction.textContent = "Begin walking to establish direction";
         els.headingSource.textContent = "Waiting";
@@ -656,10 +694,21 @@
       heading = 360 - event.alpha;
     }
 
-    if (heading !== null && Number.isFinite(heading)) {
-      deviceHeading = normaliseDegrees(heading);
-      updateNavigation();
-    }
+    if (heading === null || !Number.isFinite(heading)) return;
+
+    const normalisedHeading = normaliseDegrees(heading);
+
+    smoothedHeading = smoothHeading(
+      smoothedHeading,
+      normalisedHeading,
+      isUserMoving ? 0.18 : HEADING_SMOOTHING
+    );
+
+    if (!shouldAcceptHeading(smoothedHeading)) return;
+
+    lastAcceptedHeading = smoothedHeading;
+    deviceHeading = smoothedHeading;
+    updateNavigation();
   }
 
   async function requestOrientationAccess() {
@@ -686,6 +735,24 @@
     watchId = navigator.geolocation.watchPosition(
       position => {
         currentPosition = position;
+
+        if (lastPositionForMovement) {
+          const movedMetres = distanceMetres(
+            lastPositionForMovement.coords.latitude,
+            lastPositionForMovement.coords.longitude,
+            position.coords.latitude,
+            position.coords.longitude
+          );
+
+          const reportedSpeed = position.coords.speed;
+          isUserMoving =
+            movedMetres >= MOVEMENT_THRESHOLD_METRES ||
+            (typeof reportedSpeed === "number" &&
+             Number.isFinite(reportedSpeed) &&
+             reportedSpeed > 0.45);
+        }
+
+        lastPositionForMovement = position;
 
         const speed = position.coords.speed;
         const heading = position.coords.heading;
