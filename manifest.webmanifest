@@ -1,0 +1,11 @@
+{
+  "name": "Navable Arrow Navigation",
+  "short_name": "Navable",
+  "description": "Simple arrow guidance to a shared GPS destination.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#06101d",
+  "theme_color": "#07111f",
+  "orientation": "portrait"
+}

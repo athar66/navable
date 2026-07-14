@@ -3,25 +3,32 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#111827" />
-  <title>JSUK Navigation</title>
+  <meta name="theme-color" content="#07111f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Navable" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>Navable</title>
   <style>
     :root {
       color-scheme: dark;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #070b14;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #06101d;
       color: #f8fafc;
     }
 
     * { box-sizing: border-box; }
 
-    body {
+    html, body {
       margin: 0;
-      min-height: 100dvh;
+      min-height: 100%;
+      overflow-x: hidden;
       background:
-        radial-gradient(circle at top, rgba(30, 64, 175, .28), transparent 38%),
-        linear-gradient(180deg, #111827 0%, #070b14 70%);
+        radial-gradient(circle at 50% -10%, rgba(37, 99, 235, .38), transparent 34rem),
+        linear-gradient(180deg, #0c1728 0%, #06101d 58%, #040a12 100%);
     }
+
+    body { min-height: 100dvh; }
 
     button { font: inherit; }
 
@@ -29,39 +36,89 @@
       width: min(100%, 620px);
       min-height: 100dvh;
       margin: 0 auto;
-      padding: max(22px, env(safe-area-inset-top)) 22px
-               max(24px, env(safe-area-inset-bottom));
+      padding:
+        max(18px, env(safe-area-inset-top))
+        18px
+        max(20px, env(safe-area-inset-bottom));
       display: flex;
       flex-direction: column;
+      position: relative;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 42px;
     }
 
     .brand {
-      font-size: .78rem;
-      font-weight: 800;
-      letter-spacing: .18em;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-weight: 850;
+      letter-spacing: .02em;
+    }
+
+    .brand-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, #60a5fa, #2563eb);
+      box-shadow: 0 10px 25px rgba(37, 99, 235, .28);
+    }
+
+    .brand-mark svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .status-pill {
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: .76rem;
+      font-weight: 750;
       color: #93c5fd;
-      text-transform: uppercase;
+      background: rgba(30, 64, 175, .24);
+      border: 1px solid rgba(96, 165, 250, .18);
+    }
+
+    .destination {
+      margin-top: 18px;
       text-align: center;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      color: #60a5fa;
+      font-size: .76rem;
+      font-weight: 850;
+      letter-spacing: .14em;
+      text-transform: uppercase;
     }
 
     h1 {
-      margin: 14px 0 4px;
-      font-size: clamp(1.7rem, 7vw, 2.8rem);
-      line-height: 1.1;
-      text-align: center;
+      margin: 0;
+      font-size: clamp(1.75rem, 7vw, 2.8rem);
+      line-height: 1.08;
+      letter-spacing: -.035em;
     }
 
-    .subtitle {
-      margin: 0;
-      color: #94a3b8;
-      text-align: center;
+    .instruction {
+      margin: 10px 0 0;
+      min-height: 28px;
+      color: #cbd5e1;
+      font-size: clamp(1rem, 4.4vw, 1.24rem);
+      font-weight: 700;
     }
 
     .navigator {
       flex: 1;
       display: grid;
       place-items: center;
-      padding: 22px 0;
+      padding: 18px 0;
     }
 
     .nav-content {
@@ -69,36 +126,72 @@
       text-align: center;
     }
 
-    .arrow-shell {
-      width: min(68vw, 330px);
+    .compass-wrap {
+      position: relative;
+      width: min(76vw, 360px);
       aspect-ratio: 1;
       margin: 0 auto 22px;
+    }
+
+    .pulse {
+      position: absolute;
+      inset: 5%;
+      border-radius: 50%;
+      border: 1px solid rgba(96, 165, 250, .12);
+      animation: breathe 2.7s ease-in-out infinite;
+    }
+
+    .compass {
+      position: absolute;
+      inset: 0;
       border-radius: 50%;
       display: grid;
       place-items: center;
-      background: rgba(15, 23, 42, .72);
-      border: 1px solid rgba(148, 163, 184, .22);
+      overflow: hidden;
+      background:
+        radial-gradient(circle, rgba(37, 99, 235, .16), rgba(8, 17, 31, .88) 63%),
+        rgba(8, 17, 31, .85);
+      border: 1px solid rgba(148, 163, 184, .2);
       box-shadow:
-        inset 0 0 45px rgba(59, 130, 246, .12),
-        0 24px 70px rgba(0, 0, 0, .35);
-      position: relative;
+        inset 0 0 70px rgba(59, 130, 246, .1),
+        0 34px 90px rgba(0, 0, 0, .42);
     }
 
-    .arrow-shell::before {
+    .compass::before,
+    .compass::after {
       content: "";
       position: absolute;
-      inset: 11%;
-      border-radius: 50%;
-      border: 1px dashed rgba(147, 197, 253, .2);
+      background: rgba(148, 163, 184, .1);
+    }
+
+    .compass::before {
+      width: 1px;
+      height: 80%;
+    }
+
+    .compass::after {
+      width: 80%;
+      height: 1px;
+    }
+
+    .north {
+      position: absolute;
+      top: 7%;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #64748b;
+      font-size: .75rem;
+      font-weight: 900;
+      letter-spacing: .12em;
     }
 
     .arrow {
-      width: 46%;
-      height: 58%;
+      width: 45%;
+      height: 59%;
       transform-origin: 50% 54%;
       transform: rotate(0deg);
-      transition: transform 160ms linear;
-      filter: drop-shadow(0 12px 22px rgba(37, 99, 235, .5));
+      will-change: transform;
+      filter: drop-shadow(0 15px 25px rgba(37, 99, 235, .48));
     }
 
     .arrow svg {
@@ -107,125 +200,279 @@
       display: block;
     }
 
+    .distance-row {
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      gap: 9px;
+    }
+
     .distance {
-      font-size: clamp(2.6rem, 13vw, 5rem);
-      font-weight: 850;
-      line-height: 1;
-      letter-spacing: -.05em;
+      font-size: clamp(3rem, 14vw, 5.3rem);
+      font-weight: 900;
+      line-height: .95;
+      letter-spacing: -.06em;
     }
 
-    .distance-label {
-      margin-top: 8px;
+    .unit {
       color: #94a3b8;
-      font-size: 1rem;
+      font-size: 1.2rem;
+      font-weight: 800;
     }
 
-    .status-card {
+    .remaining-label {
+      margin-top: 9px;
+      color: #94a3b8;
+      font-size: .94rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
       margin-top: 24px;
-      padding: 15px 16px;
-      border-radius: 16px;
-      background: rgba(15, 23, 42, .72);
-      border: 1px solid rgba(148, 163, 184, .18);
-      color: #cbd5e1;
-      line-height: 1.45;
     }
 
-    .accuracy {
-      margin-top: 6px;
-      color: #94a3b8;
-      font-size: .9rem;
+    .info-card {
+      padding: 13px 12px;
+      border-radius: 16px;
+      text-align: left;
+      background: rgba(15, 23, 42, .65);
+      border: 1px solid rgba(148, 163, 184, .15);
+    }
+
+    .info-label {
+      color: #64748b;
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .info-value {
+      margin-top: 4px;
+      color: #e2e8f0;
+      font-weight: 750;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .notice {
+      margin-top: 10px;
+      padding: 13px 14px;
+      border-radius: 16px;
+      color: #cbd5e1;
+      background: rgba(15, 23, 42, .68);
+      border: 1px solid rgba(148, 163, 184, .16);
+      line-height: 1.42;
+      text-align: left;
+    }
+
+    .notice.error {
+      color: #fecaca;
+      background: rgba(127, 29, 29, .32);
+      border-color: rgba(248, 113, 113, .3);
+    }
+
+    .notice.success {
+      color: #bbf7d0;
+      background: rgba(20, 83, 45, .32);
+      border-color: rgba(74, 222, 128, .3);
     }
 
     .controls {
       display: grid;
-      gap: 10px;
+      gap: 9px;
+    }
+
+    .primary, .secondary {
+      width: 100%;
+      min-height: 57px;
+      border-radius: 17px;
+      padding: 14px 18px;
+      font-weight: 850;
+      cursor: pointer;
     }
 
     .primary {
-      width: 100%;
-      min-height: 58px;
       border: 0;
-      border-radius: 17px;
-      padding: 14px 18px;
-      background: #2563eb;
-      color: white;
-      font-weight: 800;
-      font-size: 1.08rem;
-      cursor: pointer;
-      box-shadow: 0 14px 30px rgba(37, 99, 235, .28);
+      color: #fff;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      box-shadow: 0 15px 34px rgba(37, 99, 235, .3);
     }
 
-    .primary:disabled {
+    .secondary {
+      border: 1px solid rgba(148, 163, 184, .2);
+      color: #e2e8f0;
+      background: rgba(15, 23, 42, .66);
+    }
+
+    button:disabled {
       opacity: .55;
       cursor: wait;
     }
 
-    .hint {
-      margin: 2px 5px 0;
+    .privacy {
+      margin: 0 6px;
       color: #64748b;
-      font-size: .82rem;
-      text-align: center;
+      font-size: .76rem;
       line-height: 1.4;
+      text-align: center;
     }
 
-    .error {
-      color: #fecaca;
-      background: rgba(127, 29, 29, .35);
-      border-color: rgba(248, 113, 113, .35);
+    .arrival-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at center, rgba(34, 197, 94, .25), transparent 50%),
+        rgba(3, 10, 18, .96);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .25s ease, visibility .25s ease;
     }
 
-    .arrived {
+    .arrival-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .arrival-card {
+      width: min(100%, 440px);
+      text-align: center;
+    }
+
+    .check {
+      width: 98px;
+      height: 98px;
+      margin: 0 auto 24px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: rgba(34, 197, 94, .15);
+      border: 1px solid rgba(74, 222, 128, .35);
+      box-shadow: 0 0 60px rgba(34, 197, 94, .18);
+    }
+
+    .check svg {
+      width: 50px;
+      height: 50px;
+    }
+
+    .arrival-card h2 {
+      margin: 0;
+      font-size: clamp(2rem, 8vw, 3rem);
+    }
+
+    .arrival-card p {
       color: #bbf7d0;
-      background: rgba(20, 83, 45, .35);
-      border-color: rgba(74, 222, 128, .35);
+      font-size: 1.1rem;
+      line-height: 1.5;
     }
 
-    .hidden { display: none !important; }
+    @keyframes breathe {
+      0%, 100% { transform: scale(.98); opacity: .55; }
+      50% { transform: scale(1.04); opacity: 1; }
+    }
+
+    @media (max-height: 690px) {
+      .destination { margin-top: 8px; }
+      .navigator { padding: 8px 0; }
+      .compass-wrap { width: min(58vh, 290px); margin-bottom: 12px; }
+      .info-grid { margin-top: 14px; }
+      .notice { margin-top: 8px; }
+    }
   </style>
 </head>
 <body>
   <main class="app">
     <header>
-      <div class="brand">JSUK Direction Finder</div>
-      <h1 id="destinationName">Destination</h1>
-      <p class="subtitle">Follow the arrow towards your allocated location</p>
+      <div class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M12 2 20 12h-5v10H9V12H4L12 2Z" fill="white"/>
+            </svg>
+          </span>
+          Navable
+        </div>
+        <span id="modePill" class="status-pill">Ready</span>
+      </div>
+
+      <section class="destination">
+        <p class="eyebrow">Your destination</p>
+        <h1 id="destinationName">Destination</h1>
+        <p id="instruction" class="instruction">Tap start to begin guidance</p>
+      </section>
     </header>
 
     <section class="navigator">
       <div class="nav-content">
-        <div class="arrow-shell" aria-label="Direction arrow">
-          <div id="arrow" class="arrow">
-            <svg viewBox="0 0 100 130" aria-hidden="true">
-              <defs>
-                <linearGradient id="arrowGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#dbeafe"/>
-                  <stop offset="42%" stop-color="#60a5fa"/>
-                  <stop offset="100%" stop-color="#2563eb"/>
-                </linearGradient>
-              </defs>
-              <path fill="url(#arrowGradient)"
-                    d="M50 2 96 62H69v62H31V62H4L50 2Z"/>
-            </svg>
+        <div class="compass-wrap">
+          <div class="pulse"></div>
+          <div class="compass">
+            <span class="north">N</span>
+            <div id="arrow" class="arrow">
+              <svg viewBox="0 0 100 132" aria-hidden="true">
+                <defs>
+                  <linearGradient id="arrowGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#eff6ff"/>
+                    <stop offset="42%" stop-color="#60a5fa"/>
+                    <stop offset="100%" stop-color="#1d4ed8"/>
+                  </linearGradient>
+                </defs>
+                <path fill="url(#arrowGradient)" d="M50 2 97 63H70v63H30V63H3L50 2Z"/>
+              </svg>
+            </div>
           </div>
         </div>
 
-        <div id="distance" class="distance">—</div>
-        <div id="distanceLabel" class="distance-label">Waiting to start</div>
+        <div class="distance-row">
+          <span id="distance" class="distance">—</span>
+          <span id="unit" class="unit"></span>
+        </div>
+        <div id="remainingLabel" class="remaining-label">Waiting for location</div>
 
-        <div id="statusCard" class="status-card">
-          Tap <strong>Start navigation</strong>, then allow location and motion access.
-          <div id="accuracy" class="accuracy"></div>
+        <div class="info-grid">
+          <div class="info-card">
+            <div class="info-label">GPS accuracy</div>
+            <div id="accuracy" class="info-value">—</div>
+          </div>
+          <div class="info-card">
+            <div class="info-label">Direction source</div>
+            <div id="headingSource" class="info-value">—</div>
+          </div>
+        </div>
+
+        <div id="notice" class="notice">
+          Allow location and motion access when requested. Hold your phone upright while walking.
         </div>
       </div>
     </section>
 
     <footer class="controls">
       <button id="startButton" class="primary" type="button">Start navigation</button>
-      <div class="hint">
-        Keep the phone upright and away from large metal objects. Location and compass readings remain in your browser.
-      </div>
+      <button id="recalibrateButton" class="secondary" type="button" hidden>Recalibrate compass</button>
+      <p class="privacy">Your live location is processed only on this device and is not uploaded.</p>
     </footer>
   </main>
+
+  <section id="arrivalOverlay" class="arrival-overlay" aria-hidden="true">
+    <div class="arrival-card">
+      <div class="check">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="m5 12.5 4.2 4.2L19 7" stroke="#86efac" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2>You’ve arrived</h2>
+      <p id="arrivalText">You are at your destination.</p>
+      <button id="closeArrival" class="secondary" type="button">Continue viewing</button>
+    </div>
+  </section>
 
 <script>
 (() => {
@@ -236,15 +483,26 @@
   const destinationLat = Number(params.get("lat"));
   const destinationLng = Number(params.get("lng"));
 
-  const destinationName = document.getElementById("destinationName");
-  const startButton = document.getElementById("startButton");
-  const arrow = document.getElementById("arrow");
-  const distanceEl = document.getElementById("distance");
-  const distanceLabel = document.getElementById("distanceLabel");
-  const statusCard = document.getElementById("statusCard");
-  const accuracyEl = document.getElementById("accuracy");
+  const els = {
+    destinationName: document.getElementById("destinationName"),
+    instruction: document.getElementById("instruction"),
+    modePill: document.getElementById("modePill"),
+    arrow: document.getElementById("arrow"),
+    distance: document.getElementById("distance"),
+    unit: document.getElementById("unit"),
+    remainingLabel: document.getElementById("remainingLabel"),
+    accuracy: document.getElementById("accuracy"),
+    headingSource: document.getElementById("headingSource"),
+    notice: document.getElementById("notice"),
+    startButton: document.getElementById("startButton"),
+    recalibrateButton: document.getElementById("recalibrateButton"),
+    arrivalOverlay: document.getElementById("arrivalOverlay"),
+    arrivalText: document.getElementById("arrivalText"),
+    closeArrival: document.getElementById("closeArrival")
+  };
 
-  destinationName.textContent = name;
+  els.destinationName.textContent = name;
+  document.title = `${name} · Navable`;
 
   const validCoordinates =
     Number.isFinite(destinationLat) &&
@@ -259,18 +517,13 @@
   let gpsHeading = null;
   let watchId = null;
   let lastArrowRotation = 0;
+  let animationFrame = null;
+  let requestedRotation = 0;
+  let arrivalShown = false;
 
-  function toRadians(value) {
-    return value * Math.PI / 180;
-  }
-
-  function toDegrees(value) {
-    return value * 180 / Math.PI;
-  }
-
-  function normaliseDegrees(value) {
-    return (value % 360 + 360) % 360;
-  }
+  const toRadians = value => value * Math.PI / 180;
+  const toDegrees = value => value * 180 / Math.PI;
+  const normaliseDegrees = value => (value % 360 + 360) % 360;
 
   function shortestRotation(from, to) {
     return from + ((to - from + 540) % 360 - 180);
@@ -285,7 +538,6 @@
       Math.cos(toRadians(lat1)) *
       Math.cos(toRadians(lat2)) *
       Math.sin(lngDelta / 2) ** 2;
-
     return earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
@@ -302,15 +554,61 @@
     return normaliseDegrees(toDegrees(Math.atan2(y, x)));
   }
 
-  function formatDistance(metres) {
-    if (metres < 10) return `${Math.round(metres * 10) / 10} m`;
-    if (metres < 1000) return `${Math.round(metres)} m`;
-    return `${(metres / 1000).toFixed(metres < 10000 ? 1 : 0)} km`;
+  function setNotice(message, type = "") {
+    els.notice.textContent = message;
+    els.notice.className = `notice ${type}`.trim();
   }
 
-  function setStatus(message, type = "") {
-    statusCard.className = `status-card ${type}`.trim();
-    statusCard.childNodes[0].textContent = message;
+  function formatDistance(metres) {
+    if (metres < 10) return { value: (Math.round(metres * 10) / 10).toString(), unit: "m" };
+    if (metres < 1000) return { value: Math.round(metres).toString(), unit: "m" };
+    return { value: (metres / 1000).toFixed(metres < 10000 ? 1 : 0), unit: "km" };
+  }
+
+  function guidanceText(relativeAngle) {
+    const signed = ((relativeAngle + 540) % 360) - 180;
+    const abs = Math.abs(signed);
+
+    if (abs <= 12) return "Continue straight ahead";
+    if (abs <= 40) return signed > 0 ? "Bear right" : "Bear left";
+    if (abs <= 105) return signed > 0 ? "Turn right" : "Turn left";
+    return "Turn around";
+  }
+
+  function animateArrow() {
+    const delta = requestedRotation - lastArrowRotation;
+    if (Math.abs(delta) < 0.08) {
+      lastArrowRotation = requestedRotation;
+      els.arrow.style.transform = `rotate(${lastArrowRotation}deg)`;
+      animationFrame = null;
+      return;
+    }
+
+    lastArrowRotation += delta * 0.16;
+    els.arrow.style.transform = `rotate(${lastArrowRotation}deg)`;
+    animationFrame = requestAnimationFrame(animateArrow);
+  }
+
+  function setArrowRotation(rotation) {
+    requestedRotation = shortestRotation(lastArrowRotation, rotation);
+    if (animationFrame === null) {
+      animationFrame = requestAnimationFrame(animateArrow);
+    }
+  }
+
+  function vibrateArrival() {
+    if ("vibrate" in navigator) {
+      navigator.vibrate([160, 90, 160]);
+    }
+  }
+
+  function showArrival() {
+    if (arrivalShown) return;
+    arrivalShown = true;
+    els.arrivalText.textContent = `You are at ${name}.`;
+    els.arrivalOverlay.classList.add("visible");
+    els.arrivalOverlay.setAttribute("aria-hidden", "false");
+    vibrateArrival();
   }
 
   function updateNavigation() {
@@ -319,41 +617,42 @@
     const { latitude, longitude, accuracy } = currentPosition.coords;
     const metres = distanceMetres(latitude, longitude, destinationLat, destinationLng);
     const targetBearing = bearingDegrees(latitude, longitude, destinationLat, destinationLng);
-
-    distanceEl.textContent = formatDistance(metres);
-    distanceLabel.textContent = metres <= Math.max(8, accuracy)
-      ? "Destination reached"
-      : "remaining";
-
-    accuracyEl.textContent = Number.isFinite(accuracy)
-      ? `GPS accuracy: approximately ${Math.round(accuracy)} m`
-      : "";
-
-    if (metres <= Math.max(8, accuracy)) {
-      setStatus(`You have arrived at ${name}.`, "arrived");
-    } else {
-      setStatus(`Continue towards ${name}.`);
-    }
-
     const heading = deviceHeading ?? gpsHeading;
-    if (heading !== null) {
-      const desiredRotation = normaliseDegrees(targetBearing - heading);
-      lastArrowRotation = shortestRotation(lastArrowRotation, desiredRotation);
-      arrow.style.transform = `rotate(${lastArrowRotation}deg)`;
+    const formatted = formatDistance(metres);
+    const arrivalRadius = Math.max(8, Math.min(20, Number.isFinite(accuracy) ? accuracy : 8));
+
+    els.distance.textContent = formatted.value;
+    els.unit.textContent = formatted.unit;
+    els.accuracy.textContent = Number.isFinite(accuracy) ? `± ${Math.round(accuracy)} m` : "Unknown";
+
+    if (metres <= arrivalRadius) {
+      els.instruction.textContent = "Destination reached";
+      els.remainingLabel.textContent = "You are within the arrival area";
+      els.modePill.textContent = "Arrived";
+      setNotice(`You have arrived at ${name}.`, "success");
+      showArrival();
+    } else {
+      els.remainingLabel.textContent = "remaining";
+      els.modePill.textContent = "Navigating";
+
+      if (heading !== null) {
+        const rotation = normaliseDegrees(targetBearing - heading);
+        setArrowRotation(rotation);
+        els.instruction.textContent = guidanceText(rotation);
+        els.headingSource.textContent = deviceHeading !== null ? "Phone compass" : "Walking direction";
+      } else {
+        els.instruction.textContent = "Begin walking to establish direction";
+        els.headingSource.textContent = "Waiting";
+      }
     }
   }
 
   function onOrientation(event) {
     let heading = null;
 
-    // Safari/iPhone supplies a compass heading directly.
     if (typeof event.webkitCompassHeading === "number") {
       heading = event.webkitCompassHeading;
-    } else if (event.absolute === true && typeof event.alpha === "number") {
-      // For absolute orientation, alpha rotates counter-clockwise from north.
-      heading = 360 - event.alpha;
     } else if (typeof event.alpha === "number") {
-      // Fallback for browsers that expose alpha without the absolute flag.
       heading = 360 - event.alpha;
     }
 
@@ -364,19 +663,18 @@
   }
 
   async function requestOrientationAccess() {
-    if (!("DeviceOrientationEvent" in window)) {
-      return false;
-    }
+    if (!("DeviceOrientationEvent" in window)) return false;
 
     if (typeof DeviceOrientationEvent.requestPermission === "function") {
       const result = await DeviceOrientationEvent.requestPermission(true);
       if (result !== "granted") {
-        throw new Error("Motion and compass permission was not granted.");
+        throw new Error("Compass permission was not granted.");
       }
     }
 
     window.addEventListener("deviceorientationabsolute", onOrientation, true);
     window.addEventListener("deviceorientation", onOrientation, true);
+    els.recalibrateButton.hidden = false;
     return true;
   }
 
@@ -403,62 +701,82 @@
       },
       error => {
         const messages = {
-          1: "Location permission was denied. Enable location access for this website and try again.",
-          2: "Your position is currently unavailable. Move outdoors and try again.",
+          1: "Location access was denied. Enable location for this website and try again.",
+          2: "Your position is unavailable. Move outdoors and try again.",
           3: "Location timed out. Please try again."
         };
-        setStatus(messages[error.code] || "Unable to read your location.", "error");
-        startButton.disabled = false;
-        startButton.textContent = "Try again";
+        setNotice(messages[error.code] || "Unable to read your location.", "error");
+        els.modePill.textContent = "Location error";
+        els.startButton.disabled = false;
+        els.startButton.textContent = "Try again";
       },
       {
         enableHighAccuracy: true,
-        maximumAge: 1000,
-        timeout: 15000
+        maximumAge: 500,
+        timeout: 20000
       }
     );
   }
 
   async function startNavigation() {
     if (!validCoordinates) {
-      setStatus("This navigation link contains missing or invalid coordinates.", "error");
+      setNotice("This link contains missing or invalid coordinates.", "error");
       return;
     }
 
-    startButton.disabled = true;
-    startButton.textContent = "Starting…";
-    setStatus("Requesting location and compass access…");
+    els.startButton.disabled = true;
+    els.startButton.textContent = "Starting…";
+    els.modePill.textContent = "Starting";
+    setNotice("Requesting location and compass access…");
 
     try {
-      // Must run inside this button event for iPhone permission handling.
       try {
         await requestOrientationAccess();
       } catch (orientationError) {
         console.warn(orientationError);
-        setStatus("Location is active, but compass access was not granted. Direction may update only while you are moving.");
+        setNotice("Location is active, but compass access was not granted. Direction will improve while you walk.");
       }
 
       startLocationTracking();
-      startButton.textContent = "Navigation active";
+      els.startButton.textContent = "Navigation active";
     } catch (error) {
       console.error(error);
-      setStatus(error.message || "Navigation could not be started.", "error");
-      startButton.disabled = false;
-      startButton.textContent = "Try again";
+      setNotice(error.message || "Navigation could not be started.", "error");
+      els.modePill.textContent = "Error";
+      els.startButton.disabled = false;
+      els.startButton.textContent = "Try again";
     }
   }
 
-  startButton.addEventListener("click", startNavigation);
+  els.startButton.addEventListener("click", startNavigation);
+
+  els.recalibrateButton.addEventListener("click", () => {
+    setNotice("Move your phone in a figure-eight motion, then hold it upright.");
+    els.instruction.textContent = "Recalibrating compass";
+    if ("vibrate" in navigator) navigator.vibrate(60);
+  });
+
+  els.closeArrival.addEventListener("click", () => {
+    els.arrivalOverlay.classList.remove("visible");
+    els.arrivalOverlay.setAttribute("aria-hidden", "true");
+  });
 
   if (!validCoordinates) {
-    startButton.disabled = true;
-    distanceLabel.textContent = "Invalid link";
-    setStatus("The destination latitude or longitude is missing or invalid.", "error");
+    els.startButton.disabled = true;
+    els.modePill.textContent = "Invalid link";
+    els.remainingLabel.textContent = "Coordinates missing";
+    setNotice("The destination latitude or longitude is missing or invalid.", "error");
   }
 
   window.addEventListener("pagehide", () => {
     if (watchId !== null) navigator.geolocation.clearWatch(watchId);
   });
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js").catch(console.warn);
+    });
+  }
 })();
 </script>
 </body>
